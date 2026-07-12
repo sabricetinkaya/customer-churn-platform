@@ -1,0 +1,37 @@
+{
+    "model_name": "XGBoost",
+    "model_version": "v1.0.0",
+    "train_rows": 440832,
+    "test_rows": 64374,
+    "feature_count": 10,
+    "features": [
+        "Age",
+        "Gender",
+        "Tenure",
+        "Usage Frequency",
+        "Support Calls",
+        "Payment Delay",
+        "Subscription Type",
+        "Contract Length",
+        "Total Spend",
+        "Last Interaction"
+    ],
+    "train_metrics": {
+        "accuracy": 0.992598087253194,
+        "roc_auc": 0.9991661955087976,
+        "pr_auc": 0.9995037734252987,
+        "log_loss": 0.03540216386318207,
+        "brier_score": 0.00705931568518281
+    },
+    "test_metrics": {
+        "accuracy": 0.5111225028738311,
+        "roc_auc": 0.7534070498333248,
+        "pr_auc": 0.701907466253276,
+        "log_loss": 3.263152599334717,
+        "brier_score": 0.47209805250167847
+    },
+    "library_versions": {
+        "scikit_learn": "1.9.0",
+        "xgboost": "3.2.0"
+    }
+}
