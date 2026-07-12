@@ -21,35 +21,6 @@ The system predicts customer churn probability in real time, stores prediction h
 
 ---
 
-# 🏗️ System Architecture
-
-```
-                 POST /customers
-                        │
-                        ▼
-                 FastAPI Customer API
-                        │
-                        ▼
-              Kafka Topic (customer.events)
-                        │
-                        ▼
-              Prediction Service (XGBoost)
-                        │
-                        ▼
-            Kafka Topic (prediction.events)
-                        │
-                        ▼
-               Persistence Service
-                        │
-                        ▼
-                  PostgreSQL Database
-                        │
-                        ▼
-          GET /customers/{id}
-          GET /customers/{id}/history
-          GET /alerts/risk-increased
-```
-
 ---
 
 # ⚙️ Tech Stack
