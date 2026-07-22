@@ -18,8 +18,7 @@ The system predicts customer churn probability in real time, stores prediction h
 - PostgreSQL Persistence
 - Dockerized Microservices
 - XGBoost Machine Learning Model
-
----
+- Automated CI/CD Pipeline (GitHub Actions & Pytest)
 
 ---
 
@@ -34,8 +33,22 @@ The system predicts customer churn probability in real time, stores prediction h
 | ORM | SQLAlchemy |
 | Event Streaming | Apache Kafka |
 | Containerization | Docker & Docker Compose |
+| CI/CD & Testing | GitHub Actions, Pytest, Flake8 |
+| Artifact Registry | Docker Hub |
 | Monitoring | Prometheus |
 | API Documentation | Swagger UI |
+
+---
+
+# 🔄 CI/CD & Quality Assurance
+
+This platform features a fully automated **GitHub Actions CI/CD pipeline** triggered on every `push` or `pull_request` to the main branch.
+
+Code Push ──► Code Quality (flake8) ──► Unit Tests (pytest) ──► Build & Push (Docker Hub)
+
+1. **Static Code Analysis:** Enforces PEP 8 compliance using `flake8`.
+2. **Automated Unit Testing:** Executes unit tests via `pytest` to guarantee system integrity prior to containerization.
+3. **Automated Deployment Artifacts:** Builds multi-container Docker images and pushes them automatically to **Docker Hub**.
 
 ---
 
@@ -44,6 +57,9 @@ The system predicts customer churn probability in real time, stores prediction h
 ```
 customer-churn-platform/
 │
+├── .github/
+│   └── workflows/
+│       └── ci.yml          # GitHub Actions CI/CD Pipeline
 ├── data/
 ├── docs/
 │   ├── images/
@@ -61,7 +77,9 @@ customer-churn-platform/
 │   ├── training/
 │   └── utils/
 │
-├── tests/
+├── tests/                  # Pytest Unit Tests
+│   ├── init.py
+│   └── test_api.py
 │
 ├── docker-compose.yml
 ├── Dockerfile
@@ -78,8 +96,7 @@ customer-churn-platform/
 ## Clone repository
 
 ```bash
-git clone https://github.com/yourusername/customer-churn-platform.git
-
+git clone [https://github.com/sabricetinkaya/customer-churn-platform.git](https://github.com/sabricetinkaya/customer-churn-platform.git)
 cd customer-churn-platform
 ```
 
@@ -93,6 +110,14 @@ cp .env.example .env
 
 Update the environment variables if necessary.
 
+---
+---
+
+## Run Unit Tests Locally
+```bash
+pip install -r requirements.txt
+pytest
+```
 ---
 
 ## Start the project
@@ -321,16 +346,15 @@ Planned features:
 - Build Grafana dashboards
 - Kafka UI
 - AWS RDS deployment
-- CI/CD pipeline (GitHub Actions)
 - Model Registry (MLflow)
 - Authentication & Authorization (JWT)
 - Batch prediction endpoint
-- Retraining pipeline
+- Model retraining pipeline
 ---
 
 # 👨‍💻 Author
 
-**Sabri**
+**sabricetinkaya**
 
 Customer Churn Risk Monitoring Platform
 
