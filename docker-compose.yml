@@ -3,9 +3,9 @@ services:
     image: postgres:16
     container_name: churn-postgres
     environment:
-      POSTGRES_DB: churn_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -27,7 +27,6 @@ services:
       start_period: 10s
     restart: unless-stopped
 
-
   kafka:
     image: confluentinc/cp-kafka:7.6.1
     container_name: churn-kafka
@@ -39,13 +38,10 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
-
     healthcheck:
       test:
         [
@@ -58,7 +54,6 @@ services:
       start_period: 20s
     restart: unless-stopped
 
-
   init-kafka:
     image: confluentinc/cp-kafka:7.6.1
     container_name: churn-init-kafka
@@ -69,11 +64,9 @@ services:
     command:
       - |
         echo "Creating Kafka topics..."
-
         kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic customer.events --partitions 1 --replication-factor 1
         kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic prediction.events --partitions 1 --replication-factor 1
         kafka-topics --bootstrap-server kafka:9092 --create --if-not-exists --topic risk.events --partitions 1 --replication-factor 1
-
         echo "Kafka topics created successfully."
     restart: "no"
 
@@ -83,11 +76,11 @@ services:
     command: >
       sh -c "sleep 8 && python -m src.database.init_db"
     environment:
-      DATABASE_HOST: postgres
-      DATABASE_PORT: 5432
-      DATABASE_NAME: churn_db
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: postgres
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
     depends_on:
       - postgres
 
@@ -98,19 +91,19 @@ services:
       - "8000:8000"
     command: python -m uvicorn src.api.main:app --host 0.0.0.0 --port 8000
     environment:
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      KAFKA_CLIENT_ID: customer-churn-platform
-      PREDICTION_CONSUMER_GROUP: prediction-service
-      PERSISTENCE_CONSUMER_GROUP: persistence-service
-      CUSTOMER_TOPIC: customer.events
-      PREDICTION_TOPIC: prediction.events
-      RISK_TOPIC: risk.events
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      KAFKA_CLIENT_ID: ${KAFKA_CLIENT_ID}
+      PREDICTION_CONSUMER_GROUP: ${PREDICTION_CONSUMER_GROUP}
+      PERSISTENCE_CONSUMER_GROUP: ${PERSISTENCE_CONSUMER_GROUP}
+      CUSTOMER_TOPIC: ${CUSTOMER_TOPIC}
+      PREDICTION_TOPIC: ${PREDICTION_TOPIC}
+      RISK_TOPIC: ${RISK_TOPIC}
 
-      DATABASE_HOST: postgres
-      DATABASE_PORT: 5432
-      DATABASE_NAME: churn_db
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: postgres
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
     depends_on:
       kafka:
         condition: service_started
@@ -126,19 +119,19 @@ services:
     container_name: churn-prediction-service
     command: python -m src.services.prediction_service
     environment:
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      KAFKA_CLIENT_ID: prediction-service
-      PREDICTION_CONSUMER_GROUP: prediction-service
-      PERSISTENCE_CONSUMER_GROUP: persistence-service
-      CUSTOMER_TOPIC: customer.events
-      PREDICTION_TOPIC: prediction.events
-      RISK_TOPIC: risk.events
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      KAFKA_CLIENT_ID: ${KAFKA_CLIENT_ID}
+      PREDICTION_CONSUMER_GROUP: ${PREDICTION_CONSUMER_GROUP}
+      PERSISTENCE_CONSUMER_GROUP: ${PERSISTENCE_CONSUMER_GROUP}
+      CUSTOMER_TOPIC: ${CUSTOMER_TOPIC}
+      PREDICTION_TOPIC: ${PREDICTION_TOPIC}
+      RISK_TOPIC: ${RISK_TOPIC}
 
-      DATABASE_HOST: postgres
-      DATABASE_PORT: 5432
-      DATABASE_NAME: churn_db
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: postgres
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
     depends_on:
       kafka:
         condition: service_started
@@ -154,19 +147,19 @@ services:
     container_name: churn-persistence-service
     command: python -m src.services.persistence_service
     environment:
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      KAFKA_CLIENT_ID: persistence-service
-      PERSISTENCE_CONSUMER_GROUP: persistence-service
-      PREDICTION_CONSUMER_GROUP: prediction-service
-      CUSTOMER_TOPIC: customer.events
-      PREDICTION_TOPIC: prediction.events
-      RISK_TOPIC: risk.events
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      KAFKA_CLIENT_ID: ${KAFKA_CLIENT_ID}
+      PERSISTENCE_CONSUMER_GROUP: ${PERSISTENCE_CONSUMER_GROUP}
+      PREDICTION_CONSUMER_GROUP: ${PREDICTION_CONSUMER_GROUP}
+      CUSTOMER_TOPIC: ${CUSTOMER_TOPIC}
+      PREDICTION_TOPIC: ${PREDICTION_TOPIC}
+      RISK_TOPIC: ${RISK_TOPIC}
 
-      DATABASE_HOST: postgres
-      DATABASE_PORT: 5432
-      DATABASE_NAME: churn_db
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: postgres
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
     depends_on:
       kafka:
         condition: service_started
