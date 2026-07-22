@@ -1,6 +1,5 @@
 name: Customer Churn Platform CI
 
-# Hangi durumlarda tetiklenecek?
 on:
   push:
     branches: [ "main", "master" ]
@@ -8,50 +7,51 @@ on:
     branches: [ "main", "master" ]
 
 jobs:
-  # JOB 1: Kod Kontrolü ve Bağımlılıkların Test Edilmesi
   code-quality:
     name: Code Quality & Linting
     runs-on: ubuntu-latest
 
     steps:
-      - name: Kodu Çek (Checkout Repository)
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Python Ortamını Hazırla
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip" # Pip paketlerini önbelleğe alarak build süresini hızlandırır
+          cache: "pip"
 
-      - name: Linter ve Bağımlılıkları Yükle
+      - name: Install linter & dependencies
         run: |
           python -m pip install --upgrade pip
           pip install flake8
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Kod Standartlarını Kontrol Et (Flake8)
+      - name: Lint code with flake8
         run: |
-          # Syntax hatalarını veya durdurucu (fatal) sorunları yakalar
+          # Stop build if there are Python syntax errors or undefined names
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # Karmaşıklığı ve kod stilini kontrol eder (uyarı verir, pipeline'ı patlatmaz)
+          # Exit-zero treats all errors as warnings. Max line length set to 127
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-  # JOB 2: Docker Compose ve Imaj Build Kontrolü
   docker-build:
     name: Test Docker Build
-    needs: code-quality # Önce kod kalitesi kontrolünden geçmeli
+    needs: code-quality
     runs-on: ubuntu-latest
 
     steps:
-      - name: Kodu Çek (Checkout Repository)
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Environment (.env) Dosyasını Hazırla
+      - name: Create environment (.env) file
         run: |
-          # Örnek env dosyasını .env olarak kopyalarız ki build aşamasında değişken eksikliği yaşanmasın
-          cp .env.example .env
+          # Create a fallback .env file if .env.example does not exist
+          if [ -f .env.example ]; then
+            cp .env.example .env
+          else
+            touch .env
+          fi
 
-      - name: Docker Compose İmajlarını Build Et
+      - name: Build Docker Compose images
         run: |
-          # Sadece imajların hatasız build olduğunu test eder, konteynerleri ayağa kaldırmaz
           docker compose build
