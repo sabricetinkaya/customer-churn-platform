@@ -20,7 +20,7 @@ jobs:
       - name: Python Ortamını Hazırla
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.11"
           cache: "pip" # Pip paketlerini önbelleğe alarak build süresini hızlandırır
 
       - name: Linter ve Bağımlılıkları Yükle
