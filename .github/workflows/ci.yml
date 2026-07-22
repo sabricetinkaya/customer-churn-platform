@@ -29,13 +29,11 @@ jobs:
 
       - name: Lint code with flake8
         run: |
-          # Stop build if there are Python syntax errors or undefined names
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # Exit-zero treats all errors as warnings. Max line length set to 127
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-  docker-build:
-    name: Test Docker Build
+  build-and-push:
+    name: Build & Push Docker Images
     needs: code-quality
     runs-on: ubuntu-latest
 
@@ -45,13 +43,23 @@ jobs:
 
       - name: Create environment (.env) file
         run: |
-          # Create a fallback .env file if .env.example does not exist
           if [ -f .env.example ]; then
             cp .env.example .env
           else
             touch .env
           fi
 
-      - name: Build Docker Compose images
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push Docker Compose Services
         run: |
-          docker compose build
+          # Docker Compose dosyandaki servis imajlarını Docker Hub kullanıcı adınla etiketleyip build & push eder
+          DOCKER_REGISTRY=${{ secrets.DOCKERHUB_USERNAME }} docker compose build
+          DOCKER_REGISTRY=${{ secrets.DOCKERHUB_USERNAME }} docker compose push
