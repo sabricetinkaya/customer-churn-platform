@@ -1,0 +1,57 @@
+name: Customer Churn Platform CI
+
+# Hangi durumlarda tetiklenecek?
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  # JOB 1: Kod Kontrolü ve Bağımlılıkların Test Edilmesi
+  code-quality:
+    name: Code Quality & Linting
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Kodu Çek (Checkout Repository)
+        uses: actions/checkout@v4
+
+      - name: Python Ortamını Hazırla
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: "pip" # Pip paketlerini önbelleğe alarak build süresini hızlandırır
+
+      - name: Linter ve Bağımlılıkları Yükle
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Kod Standartlarını Kontrol Et (Flake8)
+        run: |
+          # Syntax hatalarını veya durdurucu (fatal) sorunları yakalar
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # Karmaşıklığı ve kod stilini kontrol eder (uyarı verir, pipeline'ı patlatmaz)
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+  # JOB 2: Docker Compose ve Imaj Build Kontrolü
+  docker-build:
+    name: Test Docker Build
+    needs: code-quality # Önce kod kalitesi kontrolünden geçmeli
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Kodu Çek (Checkout Repository)
+        uses: actions/checkout@v4
+
+      - name: Environment (.env) Dosyasını Hazırla
+        run: |
+          # Örnek env dosyasını .env olarak kopyalarız ki build aşamasında değişken eksikliği yaşanmasın
+          cp .env.example .env
+
+      - name: Docker Compose İmajlarını Build Et
+        run: |
+          # Sadece imajların hatasız build olduğunu test eder, konteynerleri ayağa kaldırmaz
+          docker compose build
