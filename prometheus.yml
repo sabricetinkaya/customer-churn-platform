@@ -5,14 +5,14 @@ scrape_configs:
   - job_name: "fastapi"
     metrics_path: /metrics
     static_configs:
-      - targets: ["api:8000"]
+      - targets: ["customer-api:8000"]
 
-  - job_name: "prediction-consumer"
+  - job_name: "prediction-service"
     metrics_path: /metrics
     static_configs:
-      - targets: ["prediction-consumer:8001"]
+      - targets: ["prediction-service:8000"]
 
-  - job_name: "db-consumer"
+  - job_name: "persistence-service"
     metrics_path: /metrics
     static_configs:
-      - targets: ["db-consumer:8002"]
+      - targets: ["persistence-service:8000"]
