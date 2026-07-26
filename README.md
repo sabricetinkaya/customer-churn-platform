@@ -1,73 +1,82 @@
 # 🚀 Customer Churn Risk Monitoring Platform
 
-> 🚧 This project is actively under development. Monitoring (Prometheus & Grafana) and cloud deployment are planned in upcoming iterations.
+An event-driven, production-ready customer churn prediction platform built with **FastAPI**, **Kafka**, **PostgreSQL**, **XGBoost**, and fully automated on **AWS Infrastructure via Terraform & GitHub Actions**.
 
-An event-driven customer churn prediction platform built with **FastAPI**, **Kafka**, **PostgreSQL**, **Docker**, and **XGBoost**.
-
-The system predicts customer churn probability in real time, stores prediction history, tracks risk transitions, and exposes REST APIs for customer monitoring.
+The system predicts customer churn probability in real time, stores prediction history, tracks risk transitions, exposes REST APIs for monitoring, and deploys natively to AWS Serverless Container Infrastructure (ECS Fargate).
 
 ---
 
 # ✨ Features
 
-- Customer Management API (FastAPI)
-- Event-Driven Architecture (Kafka)
-- Real-time Churn Prediction
-- Prediction History Tracking
-- Risk Level Monitoring
-- PostgreSQL Persistence
-- Dockerized Microservices
-- XGBoost Machine Learning Model
-- Automated CI/CD Pipeline (GitHub Actions & Pytest)
+- **Customer Management API:** High-performance RESTful endpoints using FastAPI.
+- **Event-Driven Architecture:** Asynchronous event streaming powered by Apache Kafka.
+- **Real-time Churn Prediction:** Machine learning inference powered by XGBoost.
+- **Data Persistence:** Relational prediction history and risk level tracking stored in PostgreSQL.
+- **Infrastructure as Code (IaC):** Entire AWS cloud footprint managed seamlessly with Terraform.
+- **Serverless Cloud Compute:** Deployed to AWS ECS Fargate with zero server management.
+- **Automated CI/CD Pipeline:** Fully automated build, test, Docker image push (AWS ECR), and rolling deployment (AWS ECS) via GitHub Actions.
 
 ---
 
 # ⚙️ Tech Stack
 
-| Category | Technology |
-|-----------|------------|
-| Backend | FastAPI |
-| Machine Learning | XGBoost |
-| Data Processing | Pandas, NumPy |
-| Database | PostgreSQL |
-| ORM | SQLAlchemy |
-| Event Streaming | Apache Kafka |
-| Containerization | Docker & Docker Compose |
-| CI/CD & Testing | GitHub Actions, Pytest, Flake8 |
-| Artifact Registry | Docker Hub |
-| Monitoring | Prometheus |
-| API Documentation | Swagger UI |
+| Category | Technology                                              |
+|-----------|---------------------------------------------------------|
+| **Backend & API** | FastAPI, Swagger UI                                     |
+| **Machine Learning** | XGBoost, Pandas, NumPy, Scikit-learn                    |
+| **Event Streaming** | Apache Kafka (KRaft mode)                               |
+| **Database** | PostgreSQL, AWS RDS (PostgreSQL)                        |
+| **ORM & Driver** | SQLAlchemy, psycopg2                                    |
+| **Containerization** | Docker, Docker Compose, AWS ECR                         |
+| **Cloud & IaC** | AWS (ECS Fargate, RDS, IAM, Security Groups), Terraform |
+| **CI/CD & Testing** | GitHub Actions, Pytest, Flake8                          |
+| **Monitoring (Local)** | Prometheus, Grafana (Local dev)                         |
 
 ---
 
-# 🔄 CI/CD & Quality Assurance
+# ☁️ Cloud Infrastructure & CI/CD Pipeline
 
-This platform features a fully automated **GitHub Actions CI/CD pipeline** triggered on every `push` or `pull_request` to the main branch.
+The platform uses a fully automated **Cloud Deployment Strategy** using Terraform and GitHub Actions.
 
-Code Push ──► Code Quality (flake8) ──► Unit Tests (pytest) ──► Build & Push (Docker Hub)
+### 🏗️ AWS Cloud Architecture
+- **AWS ECS Fargate:** Serverless container execution for API, Prediction, Persistence, and Kafka services.
+- **AWS RDS (PostgreSQL):** Fully managed, isolated database instance running inside AWS VPC.
+- **AWS ECR:** Amazon Elastic Container Registry storing versioned microservice Docker images.
 
-1. **Static Code Analysis:** Enforces PEP 8 compliance using `flake8`.
-2. **Automated Unit Testing:** Executes unit tests via `pytest` to guarantee system integrity prior to containerization.
-3. **Automated Deployment Artifacts:** Builds multi-container Docker images and pushes them automatically to **Docker Hub**.
+### 🔄 CI/CD Workflow
+Every `push` or `pull_request` to the `main` or `feature/*` branches triggers the GitHub Actions workflow:
 
+```text
+Code Push ──► Static Code Check (flake8) ──► Unit Tests (pytest) ──► AWS ECR Build & Push ──► AWS ECS Fargate Rolling Deploy
+```
+---
+1. Linting & Code Quality: Code compliance checked via flake8.
+
+2. Automated Testing: Executed via pytest.
+
+3. AWS Authentication: Connects securely to AWS via GitHub Repository Secrets.
+
+4. ECR Push & ECS Update: Container images are built and pushed to AWS ECR, triggering a zero-downtime rolling update on AWS ECS Fargate.
 ---
 
 # 📂 Project Structure
 
-```
+```text
 customer-churn-platform/
 │
 ├── .github/
 │   └── workflows/
-│       └── ci.yml          # GitHub Actions CI/CD Pipeline
-├── data/
+│       ├── ci.yml          # Local CI Pipeline (Tests & Linting)
+│       └── deploy.yml      # AWS ECR & ECS Automated Deployment
 ├── docs/
 │   ├── images/
 │   └── system-design.drawio
-│
-├── logs/
-├── model_artifacts/
-├── notebooks/
+├── terraform/              # Infrastructure as Code (IaC)
+│   ├── main.tf             # VPC, ECR, & Provider configs
+│   ├── ecs.tf              # ECS Cluster, Task Definitions & Services
+│   ├── rds.tf              # AWS RDS PostgreSQL Instance & SGs
+│   ├── variables.tf
+│   └── outputs.tf
 ├── src/
 │   ├── api/
 │   ├── database/
@@ -76,22 +85,18 @@ customer-churn-platform/
 │   ├── services/
 │   ├── training/
 │   └── utils/
-│
 ├── tests/                  # Pytest Unit Tests
-│   ├── init.py
-│   └── test_api.py
-│
 ├── docker-compose.yml
 ├── Dockerfile
-├── prometheus.yml
 ├── requirements.txt
-├── README.md
-└── .env.example
+└── README.md
 ```
 
 ---
 
 # 🚀 Getting Started
+
+### 1. Local Development ( Docker Compose)
 
 ## Clone repository
 
@@ -120,47 +125,63 @@ pytest
 ```
 ---
 
-## Start the project
+## Start Services Locally
 
 ```bash
 docker compose up --build
 ```
 
 ---
-## 📐 Architecture
-The platform follows an event-driven microservice architecture.
+### 2. Cloud Development (AWS via Terraform)
 
-The overall workflow is:
+```bash
+cd terraform
 
-- Client sends customer data to the FastAPI service.
-- Customer events are published to Kafka.
-- Prediction Service consumes customer events and performs ML inference.
-- Prediction results are published back to Kafka.
-- Persistence Service stores customer snapshots and prediction history in PostgreSQL.
-- REST endpoints retrieve the latest customer state and prediction history.
+# Initialize Terraform modules
+terraform init
 
-The following diagrams illustrate the architecture in detail.
+# Plan and preview cloud resources
+terraform plan
 
-### System Architecture
+# Deploy infrastructure to AWS
+terraform apply
 
-![System Architecture](docs/images/system-architecture.png)
+# Destroy all cloud resources (to prevent unwanted charges)
+terraform destroy
+```
+
+---
+## 📐 System Architecture & Design
+
+The platform is built using a modern, event-driven, and microservice-oriented architecture deployed on AWS infrastructure. Below are the detailed architectural diagrams representing different layers of the system.
 
 ---
 
-### Docker Container Architecture
+### 1. High-Level System Architecture
+Overview of the system components, data flow, ML pipeline integration, and observability layer (Prometheus & Grafana).
 
-![Docker Container Architecture](docs/images/docker-container-architecture.png)
+![System Architecture](docs/images/system-architecture-v2.png)
 
 ---
 
-### Database ER Diagram
+### 2. AWS Cloud & Container Infrastructure
+Physical infrastructure layout on AWS using ECS Fargate, Managed RDS PostgreSQL, and ECR within a dedicated Virtual Private Cloud (VPC).
+
+![AWS Cloud Architecture](docs/images/aws-cloud-architecture.png)
+
+---
+
+### 3. CI/CD & Automated Deployment Pipeline
+Automated continuous integration and deployment workflow powered by GitHub Actions, AWS ECR, and ECS Fargate for zero-downtime rolling updates.
+
+![CI/CD Pipeline](docs/images/ci-cd-pipeline.png)
+
+---
+
+### 4. Database Schema (ER Diagram)
+Entity-Relationship structure highlighting customer feature storage, risk predictions, and audit history tracking.
 
 ![Database ER Diagram](docs/images/database-er-diagram.png)
-
----
-
-> Editable diagrams are available in `docs/system-design.drawio`.
-
 ---
 ## API Documentation
 
@@ -206,7 +227,7 @@ Example Request
 
 ---
 
-## Get Customer
+## Get Customer Current Risk State
 
 ```
 GET /customers/{customer_id}
@@ -288,25 +309,19 @@ Risk Levels
 Customer Created
 
 ```
-CustomerCreated
-        │
-        ▼
-customer.events
-        │
-        ▼
-Prediction Service
-        │
-        ▼
-PredictionCreated
-        │
-        ▼
-prediction.events
-        │
-        ▼
-Persistence Service
-        │
-        ▼
-PostgreSQL
+Customer Data (REST API) ──► FastAPI (customer-api)
+                                   │
+                                   ▼ (Publishes CustomerCreated)
+                            Kafka Topic
+                                   │
+                                   ▼ (Consumes Event)
+                           Prediction Service (XGBoost)
+                                   │
+                                   ▼ (Publishes PredictionCreated)
+                            Kafka Topic
+                                   │
+                                   ▼ (Consumes Prediction)
+                          Persistence Service ──► AWS RDS PostgreSQL
 ```
 
 ---
@@ -342,20 +357,15 @@ Planned features:
 
 # 🔮 Future Improvements
 
-- Integrate Prometheus metrics collection
-- Build Grafana dashboards
-- Kafka UI
-- AWS RDS deployment
-- Model Registry (MLflow)
-- Authentication & Authorization (JWT)
-- Batch prediction endpoint
-- Model retraining pipeline
+- Centralized Grafana Dashboards for ECS Container Metrics
+- Model Registry & Tracking using MLflow
+- Authentication & Authorization (OAuth2 / JWT)
+- Automated Model Retraining Pipeline
+
 ---
 
 # 👨‍💻 Author
 
 **sabricetinkaya**
 
-Customer Churn Risk Monitoring Platform
-
-Built with FastAPI, Kafka, PostgreSQL, Docker and XGBoost.
+Built with FastAPI, Apache Kafka, XGBoost, AWS ECS Fargate, RDS, Terraform, and GitHub Actions.
