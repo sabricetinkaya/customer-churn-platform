@@ -94,6 +94,15 @@ resource "aws_ecs_task_definition" "persistence" {
       name      = "customer-churn-persistence"
       image     = "${var.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/customer-churn-persistence:latest"
       essential = true
+
+      # RDS Bağlantı Bilgileri
+      environment = [
+        { name = "DB_HOST", value = aws_db_instance.postgres.address },
+        { name = "DB_PORT", value = "5432" },
+        { name = "DB_NAME", value = "churn_db" },
+        { name = "DB_USER", value = "postgres" },
+        { name = "DB_PASSWORD", value = "ChurnDbPassword2026!" }
+      ]
     }
   ])
 }
