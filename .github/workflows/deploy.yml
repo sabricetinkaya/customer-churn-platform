@@ -1,0 +1,42 @@
+name: Deploy to AWS ECS Fargate
+
+on:
+  push:
+    branches:
+      - feature/terraform-aws-infra
+      - main
+
+env:
+  AWS_REGION: eu-north-1
+  AWS_ACCOUNT_ID: "022187637792"
+
+jobs:
+  deploy:
+    name: Build & Deploy Microservices
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, Tag, and Push Customer API Image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build -t $ECR_REGISTRY/customer-churn-api:latest .
+          docker push $ECR_REGISTRY/customer-churn-api:latest
+
+      - name: Deploy to ECS Fargate
+        run: |
+          aws ecs update-service --cluster customer-churn-cluster --service customer-churn-api-service --force-new-deployment --region ${{ env.AWS_REGION }}
