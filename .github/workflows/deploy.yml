@@ -5,6 +5,10 @@ on:
     branches:
       - feature/terraform-aws-infra
       - main
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
+      - '*.png'
 
 env:
   AWS_REGION: eu-north-1

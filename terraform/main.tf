@@ -12,7 +12,7 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Varsayılan VPC ve Subnet'leri kullanıyoruz (Pratik kurulum için)
+# Default VPCs
 resource "aws_default_vpc" "default" {
   tags = {
     Name = "Default VPC"
